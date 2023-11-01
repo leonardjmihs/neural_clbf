@@ -117,21 +117,35 @@ def main(args):
         "logs/inverted_pendulum",
         name=f"commit_{current_git_hash()}",
     )
-    trainer = pl.Trainer.from_argparse_args(
-        args,
-        logger=tb_logger,
-        reload_dataloaders_every_epoch=True,
-        max_epochs=51,
-    )
+    trainer = pl.Trainer(logger=tb_logger, 
+                        reload_dataloaders_every_n_epochs=True, 
+                        max_epochs=51, 
+                        accelerator=args.accelerator, 
+                        devices=args.devices,
+                        precision=args.precision,
+                        strategy=args.strategy
+                        )
+    #trainer = pl.Trainer.from_argparse_args(
+    #    args,
+    #    logger=tb_logger,
+    #    reload_dataloaders_every_epoch=True,
+    #    max_epochs=51,
+    #)
 
     # Train
     torch.autograd.set_detect_anomaly(True)
     trainer.fit(clbf_controller)
 
-
+#EXP3:Mon_Oct-02-2023_11-48-37_AM
+#EXP4:Mon_Oct-02-2023_12-03-13_PM
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser = pl.Trainer.add_argparse_args(parser)
+    # parser = pl.Trainer.add_argparse_args(parser)
+    parser.add_argument("--devices", default=1)
+    parser.add_argument("--accelerator", default="cpu")
+    parser.add_argument("--precision", default=32)
+    parser.add_argument("--strategy", default="ddp")
+
     args = parser.parse_args()
 
     main(args)

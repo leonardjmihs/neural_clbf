@@ -1,18 +1,19 @@
 import torch
 import matplotlib
 from neural_clbf.controllers import NeuralCLBFController
+from argparse import ArgumentParser
 
 
 matplotlib.use('TkAgg')
 
 
-def plot_inverted_pendulum():
+def plot_inverted_pendulum(args):
     # Load the checkpoint file. This should include the experiment suite used during
     # training.
-    log_file = "saved_models/review/inverted_pendulum_clf.ckpt"
+    # log_file = "saved_models/review/inverted_pendulum_clf.ckpt"
+    log_file = args.log
     neural_controller = NeuralCLBFController.load_from_checkpoint(log_file)
-
-    # Update parameters
+# Update parameters
     neural_controller.experiment_suite.experiments[1].start_x = torch.tensor(
         [
             [1.5, 1.5],
@@ -39,5 +40,10 @@ def plot_inverted_pendulum():
 
 
 if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--log", default="../../saved_models/review/inverted_pendulum_clf.ckpt")
     # eval_inverted_pendulum()
-    plot_inverted_pendulum()
+    args = parser.parse_args()
+
+    plot_inverted_pendulum(args)
+

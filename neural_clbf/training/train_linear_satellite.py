@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-
+import os
 import torch
 import torch.multiprocessing
 import pytorch_lightning as pl
@@ -16,6 +16,7 @@ from neural_clbf.experiments import (
     RolloutStateSpaceExperiment,
 )
 from neural_clbf.training.utils import current_git_hash
+from lightning.pytorch.callbacks import Callback
 
 
 torch.multiprocessing.set_sharing_strategy("file_system")
@@ -30,6 +31,17 @@ start_x = torch.tensor(
 )
 simulation_dt = 0.01
 
+
+class CustomCallback(Callback):
+    def __init__(self):
+        super().__init__()
+        self.outputs = None
+
+    def on_validation_batch_end(self, trainer, pl_module, outputs):
+        self.outputs(outputs)
+
+    def on_validation_epoch_end(self, trainer, pl_module):
+        pl_module._validation_epoch_end(self.outputs)
 
 def main(args):
     # Define the scenarios
@@ -114,6 +126,8 @@ def main(args):
         ]
     )
 
+        
+
     # Initialize the controller
     clbf_controller = NeuralCBFController(
         dynamics_model,
@@ -130,14 +144,21 @@ def main(args):
         learn_shape_epochs=100,
         use_relu=True,
     )
+    cktp_path = "./logs/linear_satellite_cbf/relu/commit_82c5b84/"
+    if os.path.exists(cktp_path):
+        clbf_controller = NeuralCBFController.load_from_checkpoint(cktp_path+"version_3/checkpoints/epoch=130-step=23056.ckpt")
 
     # Initialize the logger and trainer
     tb_logger = pl_loggers.TensorBoardLogger(
         "logs/linear_satellite_cbf/relu",
         name=f"commit_{current_git_hash()}",
     )
-    trainer = pl.Trainer.from_argparse_args(
-        args, logger=tb_logger, reload_dataloaders_every_epoch=True, max_epochs=201
+    trainer = pl.Trainer(
+        logger=tb_logger, reload_dataloaders_every_n_epochs=True, max_epochs=201,
+        accelerator=args.accelerator, 
+        devices=args.devices,
+        precision=args.precision,
+        strategy=args.strategy
     )
 
     # Train
@@ -147,7 +168,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser = pl.Trainer.add_argparse_args(parser)
+    parser.add_argument("--devices", default=1)
+    parser.add_argument("--accelerator", default="cpu")
+    parser.add_argument("--precision", default=32)
+    parser.add_argument("--strategy", default="ddp")
+
     args = parser.parse_args()
 
     main(args)

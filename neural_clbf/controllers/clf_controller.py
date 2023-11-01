@@ -172,7 +172,7 @@ class CLFController(Controller):
 
         # Get the Jacobian of V for each entry in the batch
         _, gradV = self.V_with_jacobian(x)
-
+        # print(f"{gradV.shape=}")
         # We need to compute Lie derivatives for each scenario
         batch_size = x.shape[0]
         Lf_V = torch.zeros(batch_size, n_scenarios, 1)
@@ -271,6 +271,7 @@ class CLFController(Controller):
             if allow_relaxation:
                 r = model.addMVar(n_scenarios, lb=0, ub=GRB.INFINITY)
 
+            # Define the cost
             # Define the cost
             Q = np.eye(n_controls)
             u_ref_np = u_ref[batch_idx, :].detach().cpu().numpy()

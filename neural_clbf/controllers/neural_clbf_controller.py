@@ -15,8 +15,8 @@ from neural_clbf.controllers.controller_utils import normalize_with_angles
 from neural_clbf.datamodules.episodic_datamodule import EpisodicDataModule
 from neural_clbf.experiments import ExperimentSuite
 
-
-class NeuralCLBFController(pl.LightningModule, CLFController):
+# class NeuralCLBFController(pl.LightningModule, CLFController):
+class NeuralCLBFController(CLFController, pl.LightningModule):
     """
     A neural rCLBF controller. Differs from the CLFController in that it uses a
     neural network to learn the CLF, and it turns it from a CLF to a CLBF by making sure
@@ -457,7 +457,7 @@ class NeuralCLBFController(pl.LightningModule, CLFController):
 
         return batch_dict
 
-    def training_epoch_end(self, outputs):
+    def on_training_epoch_end(self, outputs):
         """This function is called after every epoch is completed."""
         # Outputs contains a list for each optimizer, and we need to collect the losses
         # from all of them if there is a nested list
@@ -522,7 +522,7 @@ class NeuralCLBFController(pl.LightningModule, CLFController):
 
         return batch_dict
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self, outputs):
         """This function is called after every epoch is completed."""
         # Gather up all of the losses for each component from all batches
         losses = {}
@@ -562,7 +562,7 @@ class NeuralCLBFController(pl.LightningModule, CLFController):
             self, self.logger, self.current_epoch
         )
 
-    @pl.core.decorators.auto_move_data
+    # @pl.core.decorators.auto_move_data
     def simulator_fn(
         self,
         x_init: torch.Tensor,

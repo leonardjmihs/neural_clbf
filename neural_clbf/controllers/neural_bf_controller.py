@@ -14,7 +14,8 @@ from neural_clbf.datamodules.episodic_datamodule import EpisodicDataModule
 from neural_clbf.experiments import ExperimentSuite
 
 
-class NeuralObsBFController(pl.LightningModule, Controller):
+# class NeuralObsBFController(pl.LightningModule, Controller):
+class NeuralObsBFController(Controller, pl.LightningModule):
     """
     A neural BF controller that relies on observations. Differs from CBF controllers in
     that it does not solve a QP to get the control input and that the BF and policy are
@@ -1142,7 +1143,7 @@ class NeuralObsBFController(pl.LightningModule, Controller):
 
         return batch_dict
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self, outputs):
         """This function is called after every epoch is completed."""
         # Gather up all of the losses for each component from all batches
         losses = {}
@@ -1186,14 +1187,14 @@ class NeuralObsBFController(pl.LightningModule, Controller):
             )
             self.dynamics_model = self.training_dynamics_model
 
-    @pl.core.decorators.auto_move_data
+    # @pl.core.decorators.auto_move_data
     def simulator_fn(
         self,
         x_init: torch.Tensor,
         num_steps: int,
     ):
         # Reset this controller then return the simulation results
-        self.reset_controller(x_init)
+        self.reset_controller(x_init.to())
 
         return self.dynamics_model.simulate(
             x_init,

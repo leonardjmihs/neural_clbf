@@ -247,7 +247,7 @@ class EpisodicDataModule(pl.LightningDataModule):
         return DataLoader(
             self.training_data,
             batch_size=self.batch_size,
-            num_workers=4,
+            num_workers=12,
         )
 
     def val_dataloader(self):
@@ -255,5 +255,5 @@ class EpisodicDataModule(pl.LightningDataModule):
         return DataLoader(
             self.validation_data,
             batch_size=self.batch_size,
-            num_workers=4,
+            num_workers=12,
         )

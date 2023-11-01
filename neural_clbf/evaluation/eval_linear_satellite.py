@@ -5,17 +5,19 @@ import numpy as np
 import matplotlib
 
 from neural_clbf.controllers import NeuralCBFController
+from argparse import ArgumentParser
 
 
 matplotlib.use('TkAgg')
 
 
-def plot_linear_satellite():
+def plot_linear_satellite(args):
     # Load the checkpoint file. This should include the experiment suite used during
     # training.
-    log_file = "saved_models/review/linear_satellite_cbf.ckpt"
+    log_file = args.log
     # log_file = "logs/linear_satellite_cbf/tanh/commit_7390ab2/version_0/checkpoints/epoch=20-step=3695.ckpt"
-    neural_controller = NeuralCBFController.load_from_checkpoint(log_file)
+    neural_controller = NeuralCBFController.load_from_checkpoint(log_file, strict=False)
+    print(neural_controller.disable_gurobi)
 
     # Tweak parameters
     neural_controller.cbf_relaxation_penalty = 1e2
@@ -30,17 +32,17 @@ def plot_linear_satellite():
     )
     neural_controller.experiment_suite.experiments[1].other_index = [2]
     neural_controller.experiment_suite.experiments[1].other_label = ["$z$"]
-
+    neural_controller.experiment_suite.experiments = [neural_controller.experiment_suite.experiments[0]]
     # Run the experiments and save the results
     grid_df = neural_controller.experiment_suite.experiments[0].run(neural_controller)
-    traj_df = neural_controller.experiment_suite.experiments[1].run(neural_controller)
+    # traj_df = neural_controller.experiment_suite.experiments[1].run(neural_controller)
 
     # Plot in 3D
     sns.set_theme(context="talk", style="white")
     ax = plt.axes(projection="3d")
 
     # Plot the trajectory
-    ax.plot3D(traj_df["$x$"], traj_df["$y$"], traj_df["$z$"], "black")
+    # ax.plot3D(traj_df["$x$"], traj_df["$y$"], traj_df["$z$"], "black")
     ax.set_xlim([-1.0, 1.0])
     ax.set_ylim([-1.0, 1.0])
     ax.set_zlim([-1.0, 1.0])
@@ -58,32 +60,32 @@ def plot_linear_satellite():
     # axs[1].plot(traj_df["t"], traj_df["V"])
 
     # Plot the CLF
-    # contours = ax.tricontourf(
-    #     grid_df["$x$"],
-    #     grid_df["$y$"],
-    #     grid_df["V"],
-    #     cmap=sns.color_palette("rocket", as_cmap=True),
-    #     alpha=0.2,
-    #     levels=20,
-    # )
-    # plt.colorbar(contours, ax=ax, orientation="vertical")
+    contours = ax.tricontourf(
+        grid_df["$x$"],
+        grid_df["$y$"],
+        grid_df["V"],
+        cmap=sns.color_palette("rocket", as_cmap=True),
+        alpha=0.2,
+        levels=20,
+    )
+    plt.colorbar(contours, ax=ax, orientation="vertical")
 
-    # ax.plot([], [], c="green", label="Safe Region")
-    # ax.tricontour(
-    #     grid_df["$x$"],
-    #     grid_df["$y$"],
-    #     grid_df["Safe region"] - 0.5,
-    #     colors=["green"],
-    #     levels=[0.0],
-    # )
-    # ax.plot([], [], c="magenta", label="Unsafe Region")
-    # ax.tricontour(
-    #     grid_df["$x$"],
-    #     grid_df["$y$"],
-    #     grid_df["Unsafe region"] - 0.5,
-    #     colors=["magenta"],
-    #     levels=[0.0],
-    # )
+    ax.plot([], [], c="green", label="Safe Region")
+    ax.tricontour(
+        grid_df["$x$"],
+        grid_df["$y$"],
+        grid_df["Safe region"] - 0.5,
+        colors=["green"],
+        levels=[0.0],
+    )
+    ax.plot([], [], c="magenta", label="Unsafe Region")
+    ax.tricontour(
+        grid_df["$x$"],
+        grid_df["$y$"],
+        grid_df["Unsafe region"] - 0.5,
+        colors=["magenta"],
+        levels=[0.0],
+    )
 
     ax.plot([], [], c="blue", label="V(x) = c")
     ax.tricontour(
@@ -105,4 +107,9 @@ def plot_linear_satellite():
 
 
 if __name__ == "__main__":
-    plot_linear_satellite()
+    parser = ArgumentParser()
+    parser.add_argument("--log", default="../../saved_models/review/linear_satellite_cbf.ckpt")
+    # eval_inverted_pendulum()
+    args = parser.parse_args()
+    
+    plot_linear_satellite(args)

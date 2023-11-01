@@ -1,4 +1,5 @@
 """Define a dynamical system for the F16 AeroBench model"""
+import warnings
 from warnings import warn
 from typing import Tuple, Optional, List
 
@@ -19,6 +20,7 @@ try:
     # make sure that the import worked
     assert aerobench_loader
 except ImportError:
+    warnings.filterwarnings("ignore")
     warn("Could not import F16 module; is AeroBench installed?")
 
 

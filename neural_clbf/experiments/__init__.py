@@ -1,4 +1,5 @@
 from warnings import warn
+import warnings
 
 from .experiment import Experiment
 from .experiment_suite import ExperimentSuite
@@ -41,4 +42,6 @@ try:
     __all__.append("TurtlebotHWStateFeedbackExperiment")
     __all__.append("TurtlebotHWObsFeedbackExperiment")
 except ImportError:
+    warnings.filterwarnings("ignore")
+
     warn("Could not import HW module; is ROS installed?")

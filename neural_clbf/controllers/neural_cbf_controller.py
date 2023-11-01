@@ -16,7 +16,9 @@ from neural_clbf.datamodules.episodic_datamodule import EpisodicDataModule
 from neural_clbf.experiments import ExperimentSuite
 
 
-class NeuralCBFController(pl.LightningModule, CBFController):
+
+# class NeuralCBFController(pl.LightningModule, CBFController):
+class NeuralCBFController(CBFController,pl.LightningModule):
     """
     A neural CBF controller. Differs from the CBFController in that it uses a
     neural network to learn the CBF.
@@ -180,7 +182,7 @@ class NeuralCBFController(pl.LightningModule, CBFController):
         V = x_norm
         for layer in self.V_nn:
             V = layer(V)
-
+            
             if isinstance(layer, nn.Linear):
                 JV = torch.matmul(layer.weight, JV)
             elif isinstance(layer, nn.Tanh):
@@ -189,6 +191,7 @@ class NeuralCBFController(pl.LightningModule, CBFController):
                 JV = torch.matmul(torch.diag_embed(torch.sign(V)), JV)
 
         return V, JV
+
 
     def forward(self, x):
         """Determine the control input for a given state using a QP
@@ -313,7 +316,7 @@ class NeuralCBFController(pl.LightningModule, CBFController):
 
         return batch_dict
 
-    def training_epoch_end(self, outputs):
+    def on_training_epoch_end(self, outputs):
         """This function is called after every epoch is completed."""
         # Outputs contains a list for each optimizer, and we need to collect the losses
         # from all of them if there is a nested list
@@ -382,7 +385,7 @@ class NeuralCBFController(pl.LightningModule, CBFController):
 
         return batch_dict
 
-    def validation_epoch_end(self, outputs):
+    def _validation_epoch_end(self, outputs):
         """This function is called after every epoch is completed."""
         # Gather up all of the losses for each component from all batches
         losses = {}
@@ -422,7 +425,7 @@ class NeuralCBFController(pl.LightningModule, CBFController):
             self, self.logger, self.current_epoch
         )
 
-    @pl.core.decorators.auto_move_data
+    # @pl.core.decorators.auto_move_data
     def simulator_fn(
         self,
         x_init: torch.Tensor,

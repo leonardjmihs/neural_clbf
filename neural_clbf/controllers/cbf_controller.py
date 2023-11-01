@@ -46,6 +46,7 @@ class CBFController(CLFController):
             clf_lambda=cbf_lambda,
             clf_relaxation_penalty=cbf_relaxation_penalty,
             controller_period=controller_period,
+            disable_gurobi=True
         )
 
     def V_with_jacobian(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
