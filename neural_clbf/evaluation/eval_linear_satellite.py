@@ -32,17 +32,17 @@ def plot_linear_satellite(args):
     )
     neural_controller.experiment_suite.experiments[1].other_index = [2]
     neural_controller.experiment_suite.experiments[1].other_label = ["$z$"]
-    neural_controller.experiment_suite.experiments = [neural_controller.experiment_suite.experiments[0]]
+    # neural_controller.experiment_suite.experiments = [neural_controller.experiment_suite.experiments[0]]
     # Run the experiments and save the results
     grid_df = neural_controller.experiment_suite.experiments[0].run(neural_controller)
-    # traj_df = neural_controller.experiment_suite.experiments[1].run(neural_controller)
+    traj_df = neural_controller.experiment_suite.experiments[1].run(neural_controller)
 
     # Plot in 3D
     sns.set_theme(context="talk", style="white")
     ax = plt.axes(projection="3d")
 
     # Plot the trajectory
-    # ax.plot3D(traj_df["$x$"], traj_df["$y$"], traj_df["$z$"], "black")
+    ax.plot3D(traj_df["$x$"], traj_df["$y$"], traj_df["$z$"], "black")
     ax.set_xlim([-1.0, 1.0])
     ax.set_ylim([-1.0, 1.0])
     ax.set_zlim([-1.0, 1.0])
@@ -54,10 +54,10 @@ def plot_linear_satellite(args):
     ax.set_yticks(np.linspace(-0.75, 0.75, 2))
     ax.set_zticks(np.linspace(-0.75, 0.75, 2))
 
-    # fig, axs = plt.subplots(1, 2)
-    # distance = traj_df["$x$"].abs() + traj_df["$y$"].abs() + traj_df["$z$"].abs()
-    # axs[0].plot(traj_df["t"], distance)
-    # axs[1].plot(traj_df["t"], traj_df["V"])
+    fig, axs = plt.subplots(1, 2)
+    distance = traj_df["$x$"].abs() + traj_df["$y$"].abs() + traj_df["$z$"].abs()
+    axs[0].plot(traj_df["t"], distance)
+    axs[1].plot(traj_df["t"], traj_df["V"])
 
     # Plot the CLF
     contours = ax.tricontourf(

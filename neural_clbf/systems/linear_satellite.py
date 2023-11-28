@@ -233,6 +233,66 @@ class LinearSatellite(ControlAffineSystem):
 
         return f
 
+    def _f_bounds(self, x_LB, x_UB, params):
+        """
+        Return bounds on the control-independent part of the control-affine dynamics.
+
+        args:
+            x_LB: bs x self.n_dims tensor of state lower bound
+            x_UB: bs x self.n_dims tensor of state upper bound
+            params: a dictionary giving the parameter values for the system. If None,
+                    default to the nominal parameters used at initialization
+        returns:
+            f_LB: bs x self.n_dims x 1 tensor
+            f_UB: bs x self.n_dims x 1 tensor
+        """
+        # Extract batch size and set up a tensor for holding the result
+        batch_size = x.shape[0]
+        f_LB = torch.zeros((batch_size, self.n_dims, 1))
+        f_UB = torch.zeros((batch_size, self.n_dims, 1))
+        f_LB = f_LB.type_as(x)
+        f_UB = f_UB.type_as(x)
+
+        # Extract the needed parameters
+        a = params["a"]
+        ux_target = params["ux_target"]
+        uy_target = params["uy_target"]
+        uz_target = params["uz_target"]
+        # Compute mean-motion
+        n = sqrt(LinearSatellite.MU / a ** 3)
+        # and state variables
+        x_LB = x_LB[:, LinearSatellite.X]
+        z_LB = x_LB[:, LinearSatellite.Z]
+        xdot_LB = x_LB[:, LinearSatellite.XDOT]
+        ydot_LB = x_LB[:, LinearSatellite.YDOT]
+        zdot_LB = x_LB[:, LinearSatellite.ZDOT]
+
+        x_UB = x_UB[:, LinearSatellite.X]
+        z_UB = x_UB[:, LinearSatellite.Z]
+        xdot_UB = x_UB[:, LinearSatellite.XDOT]
+        ydot_UB = x_UB[:, LinearSatellite.YDOT]
+        zdot_UB = x_UB[:, LinearSatellite.ZDOT]
+
+        # The first three dimensions just integrate the velocity
+        f_UB[:, LinearSatellite.X, 0] = xdot_UB
+        f_UB[:, LinearSatellite.Y, 0] = ydot_UB
+        f_UB[:, LinearSatellite.Z, 0] = zdot_UB
+
+        f_LB[:, LinearSatellite.X, 0] = xdot_LB
+        f_LB[:, LinearSatellite.Y, 0] = ydot_LB
+        f_LB[:, LinearSatellite.Z, 0] = zdot_LB
+
+        # The last three use the CHW equations
+        f_LB[:, LinearSatellite.XDOT, 0] = 3 * n ** 2 * x_LB + 2 * n * ydot_LB
+        f_LB[:, LinearSatellite.YDOT, 0] = -2 * n * xdot_UB
+        f_LB[:, LinearSatellite.ZDOT, 0] = -(n ** 2) * z_UB
+
+        f_UB[:, LinearSatellite.XDOT, 0] = 3 * n ** 2 * x_UB + 2 * n * ydot_UB
+        f_UB[:, LinearSatellite.YDOT, 0] = -2 * n * xdot_LB
+        f_UB[:, LinearSatellite.ZDOT, 0] = -(n ** 2) * z_LB
+
+        return f_LB, f_UB
+
     def _g(self, x: torch.Tensor, params: Scenario):
         """
         Return the control-independent part of the control-affine dynamics.
