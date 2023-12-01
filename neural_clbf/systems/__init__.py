@@ -13,6 +13,7 @@ from .segway import Segway
 from .turtlebot import TurtleBot
 from .turtlebot_2d import TurtleBot2D
 from .linear_satellite import LinearSatellite
+from .linear_point import LinearPoint
 from .single_integrator_2d import SingleIntegrator2D
 from .autorally import AutoRally
 
@@ -30,6 +31,7 @@ __all__ = [
     "TurtleBot2D",
     "Segway",
     "LinearSatellite",
+    "LinearPoint",
     "SingleIntegrator2D",
     "AutoRally",
 ]

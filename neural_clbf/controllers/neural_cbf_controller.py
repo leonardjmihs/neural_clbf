@@ -158,7 +158,8 @@ class NeuralCBFController(CBFController,pl.LightningModule):
             JV: bs x 1 x self.dynamics_model.n_dims Jacobian of each row of V wrt x
         """
         # Apply the offset and range to normalize about zero
-        x_norm = normalize_with_angles(self.dynamics_model, x, k=self.k)
+        # x_norm = normalize_with_angles(self.dynamics_model, x, k=self.k)
+        x_norm = x
 
         # Compute the CLBF layer-by-layer, computing the Jacobian alongside
 
@@ -170,7 +171,9 @@ class NeuralCBFController(CBFController,pl.LightningModule):
         ).type_as(x)
         # and for each non-angle dimension, we need to scale by the normalization
         for dim in range(self.dynamics_model.n_dims):
-            JV[:, dim, dim] = 1.0 / self.x_range[dim].type_as(x)
+        #     JV[:, dim, dim] = 1.0 / self.x_range[dim].type_as(x)
+            JV[:, dim, dim] = 1.0 
+
 
         # And adjust the Jacobian for the angle dimensions
         for offset, sin_idx in enumerate(self.dynamics_model.angle_dims):

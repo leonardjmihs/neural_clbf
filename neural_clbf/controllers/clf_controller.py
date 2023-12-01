@@ -192,6 +192,23 @@ class CLFController(Controller):
         # return the Lie derivatives
         return Lf_V, Lg_V
 
+    def dyn_bounds(self, x_lb, x_ub, scenarios = None):
+        if scenarios is None:
+            scenarios = self.scenarios
+        n_scenarios = len(scenarios)
+
+        for i in range(n_scenarios):
+            # Get the dynamics f and g for this scenario
+            s = scenarios[i]
+            f_lb, g_lb = self.dynamics_model.control_affine_dynamics(x_lb, params=s)
+            f_ub, g_ub = self.dynamics_model.control_affine_dynamics(x_ub, params=s)
+
+            f_LB = np.minimum(f_lb, f_ub)
+            f_UB = np.maximum(f_lb, f_ub)
+            g_LB = np.minimum(g_lb, g_ub)
+            g_UB = np.maximum(g_lb, g_ub)
+        return f_LB.squeeze(0).numpy(), f_UB.squeeze(0).numpy(), g_LB.squeeze(0).numpy(), g_UB.squeeze(0).numpy()
+
     def u_reference(self, x: torch.Tensor) -> torch.Tensor:
         """Determine the reference control input."""
         # Here we use the nominal controller as the reference, but subclasses can

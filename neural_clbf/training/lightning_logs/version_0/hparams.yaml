@@ -1,0 +1,198 @@
+cbf_hidden_layers: 2
+cbf_hidden_size: 64
+cbf_lambda: 0.1
+cbf_relaxation_penalty: 10000.0
+controller_period: 0.01
+datamodule: !!python/object:neural_clbf.datamodules.episodic_datamodule.EpisodicDataModule
+  _dims: !!python/tuple []
+  _has_prepared_data: false
+  _has_setup_fit: false
+  _has_setup_predict: false
+  _has_setup_test: false
+  _has_setup_validate: false
+  _has_teardown_fit: false
+  _has_teardown_predict: false
+  _has_teardown_test: false
+  _has_teardown_validate: false
+  _test_transforms: null
+  _train_transforms: null
+  _val_transforms: null
+  batch_size: 512
+  fixed_samples: 100000
+  initial_domain:
+  - &id001 !!python/tuple
+    - -1.0
+    - 1.0
+  - *id001
+  - *id001
+  - *id001
+  max_points: 50000
+  model: &id002 !!python/object:neural_clbf.systems.linear_point.LinearPoint
+    K: !!python/object/apply:torch._utils._rebuild_tensor_v2
+    - !!python/object/apply:torch.storage._load_from_bytes
+      - !!binary |
+        gAKKCmz8nEb5IGqoUBkugAJN6QMugAJ9cQAoWBAAAABwcm90b2NvbF92ZXJzaW9ucQFN6QNYDQAA
+        AGxpdHRsZV9lbmRpYW5xAohYCgAAAHR5cGVfc2l6ZXNxA31xBChYBQAAAHNob3J0cQVLAlgDAAAA
+        aW50cQZLBFgEAAAAbG9uZ3EHSwR1dS6AAihYBwAAAHN0b3JhZ2VxAGN0b3JjaApEb3VibGVTdG9y
+        YWdlCnEBWAkAAAAxMDI3NjA0ODBxAlgDAAAAY3B1cQNLCE50cQRRLoACXXEAWAkAAAAxMDI3NjA0
+        ODBxAWEuCAAAAAAAAACKX0mMXLnvPwAAAAAAAAAAwJghBwCi+z8AAAAAAAAAAAAAAAAAAAAAil9J
+        jFy57z8AAAAAAAAAAMCYIQcAovs/
+    - 0
+    - !!python/tuple
+      - 2
+      - 4
+    - !!python/tuple
+      - 4
+      - 1
+    - false
+    - !!python/object/apply:collections.OrderedDict
+      - []
+    P: !!python/object/apply:torch._utils._rebuild_tensor_v2
+    - !!python/object/apply:torch.storage._load_from_bytes
+      - !!binary |
+        gAKKCmz8nEb5IGqoUBkugAJN6QMugAJ9cQAoWBAAAABwcm90b2NvbF92ZXJzaW9ucQFN6QNYDQAA
+        AGxpdHRsZV9lbmRpYW5xAohYCgAAAHR5cGVfc2l6ZXNxA31xBChYBQAAAHNob3J0cQVLAlgDAAAA
+        aW50cQZLBFgEAAAAbG9uZ3EHSwR1dS6AAihYBwAAAHN0b3JhZ2VxAGN0b3JjaApEb3VibGVTdG9y
+        YWdlCnEBWAkAAAAxMDU1MDU5ODRxAlgDAAAAY3B1cQNLEE50cQRRLoACXXEAWAkAAAAxMDU1MDU5
+        ODRxAWEuEAAAAAAAAAA3wyxUNin3PwAAAAAAAAAA1AykXqAj4D8AAAAAAAAAAAAAAAAAAAAAN8Ms
+        VDYp9z8AAAAAAAAAANQMpF6gI+A/0wykXqAj4D8AAAAAAAAAAIpCW4n5m+I/AAAAAAAAAAAAAAAA
+        AAAAANMMpF6gI+A/AAAAAAAAAACKQluJ+ZviPw==
+    - 0
+    - !!python/tuple
+      - 4
+      - 4
+    - !!python/tuple
+      - 4
+      - 1
+    - false
+    - !!python/object/apply:collections.OrderedDict
+      - []
+    controller_dt: 0.01
+    dt: 0.01
+    nominal_params: &id004 {}
+    use_l1_norm: false
+  n_dims: 4
+  quotas:
+    goal: 0.4
+    safe: 0.2
+  trainer: null
+  trajectories_per_episode: 0
+  trajectory_length: 1
+  val_split: 0.1
+  x_center: !!python/object/apply:torch._utils._rebuild_tensor_v2
+  - !!python/object/apply:torch.storage._load_from_bytes
+    - !!binary |
+      gAKKCmz8nEb5IGqoUBkugAJN6QMugAJ9cQAoWBAAAABwcm90b2NvbF92ZXJzaW9ucQFN6QNYDQAA
+      AGxpdHRsZV9lbmRpYW5xAohYCgAAAHR5cGVfc2l6ZXNxA31xBChYBQAAAHNob3J0cQVLAlgDAAAA
+      aW50cQZLBFgEAAAAbG9uZ3EHSwR1dS6AAihYBwAAAHN0b3JhZ2VxAGN0b3JjaApGbG9hdFN0b3Jh
+      Z2UKcQFYCQAAADEwMTA0Nzk4NHECWAMAAABjcHVxA0sETnRxBFEugAJdcQBYCQAAADEwMTA0Nzk4
+      NHEBYS4EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+  - 0
+  - !!python/tuple
+    - 4
+  - !!python/tuple
+    - 1
+  - false
+  - !!python/object/apply:collections.OrderedDict
+    - []
+  x_max: !!python/object/apply:torch._utils._rebuild_tensor_v2
+  - !!python/object/apply:torch.storage._load_from_bytes
+    - !!binary |
+      gAKKCmz8nEb5IGqoUBkugAJN6QMugAJ9cQAoWBAAAABwcm90b2NvbF92ZXJzaW9ucQFN6QNYDQAA
+      AGxpdHRsZV9lbmRpYW5xAohYCgAAAHR5cGVfc2l6ZXNxA31xBChYBQAAAHNob3J0cQVLAlgDAAAA
+      aW50cQZLBFgEAAAAbG9uZ3EHSwR1dS6AAihYBwAAAHN0b3JhZ2VxAGN0b3JjaApGbG9hdFN0b3Jh
+      Z2UKcQFYCQAAADEwODA0MzI4MHECWAMAAABjcHVxA0sETnRxBFEugAJdcQBYCQAAADEwODA0MzI4
+      MHEBYS4EAAAAAAAAAAAAAEAAAABAAACAPwAAgD8=
+  - 0
+  - !!python/tuple
+    - 4
+  - !!python/tuple
+    - 1
+  - false
+  - !!python/object/apply:collections.OrderedDict
+    - []
+  x_min: !!python/object/apply:torch._utils._rebuild_tensor_v2
+  - !!python/object/apply:torch.storage._load_from_bytes
+    - !!binary |
+      gAKKCmz8nEb5IGqoUBkugAJN6QMugAJ9cQAoWBAAAABwcm90b2NvbF92ZXJzaW9ucQFN6QNYDQAA
+      AGxpdHRsZV9lbmRpYW5xAohYCgAAAHR5cGVfc2l6ZXNxA31xBChYBQAAAHNob3J0cQVLAlgDAAAA
+      aW50cQZLBFgEAAAAbG9uZ3EHSwR1dS6AAihYBwAAAHN0b3JhZ2VxAGN0b3JjaApGbG9hdFN0b3Jh
+      Z2UKcQFYCQAAADEwMTA0Nzg4OHECWAMAAABjcHVxA0sETnRxBFEugAJdcQBYCQAAADEwMTA0Nzg4
+      OHEBYS4EAAAAAAAAAAAAAMAAAADAAACAvwAAgL8=
+  - 0
+  - !!python/tuple
+    - 4
+  - !!python/tuple
+    - 1
+  - false
+  - !!python/object/apply:collections.OrderedDict
+    - []
+  x_range: !!python/object/apply:torch._utils._rebuild_tensor_v2
+  - !!python/object/apply:torch.storage._load_from_bytes
+    - !!binary |
+      gAKKCmz8nEb5IGqoUBkugAJN6QMugAJ9cQAoWBAAAABwcm90b2NvbF92ZXJzaW9ucQFN6QNYDQAA
+      AGxpdHRsZV9lbmRpYW5xAohYCgAAAHR5cGVfc2l6ZXNxA31xBChYBQAAAHNob3J0cQVLAlgDAAAA
+      aW50cQZLBFgEAAAAbG9uZ3EHSwR1dS6AAihYBwAAAHN0b3JhZ2VxAGN0b3JjaApGbG9hdFN0b3Jh
+      Z2UKcQFYCAAAADk5MTU1MjMycQJYAwAAAGNwdXEDSwROdHEEUS6AAl1xAFgIAAAAOTkxNTUyMzJx
+      AWEuBAAAAAAAAAAAAIBAAACAQAAAAEAAAABA
+  - 0
+  - !!python/tuple
+    - 4
+  - !!python/tuple
+    - 1
+  - false
+  - !!python/object/apply:collections.OrderedDict
+    - []
+dynamics_model: *id002
+experiment_suite: !!python/object:neural_clbf.experiments.experiment_suite.ExperimentSuite
+  experiments:
+  - !!python/object:neural_clbf.experiments.clf_contour_experiment.CLFContourExperiment
+    default_state: null
+    domain:
+    - &id003 !!python/tuple
+      - -1.5
+      - 1.5
+    - *id003
+    n_grid: 25
+    name: V_Contour
+    plot_unsafe_region: true
+    x_axis_index: 0
+    x_axis_label: $x$
+    y_axis_index: 1
+    y_axis_label: $y$
+  - !!python/object:neural_clbf.experiments.rollout_state_space_experiment.RolloutStateSpaceExperiment
+    n_sims_per_start: 1
+    name: Rollout State Space
+    other_index: []
+    other_label: []
+    plot_x_index: 0
+    plot_x_label: $x$
+    plot_y_index: 1
+    plot_y_label: $y$
+    scenarios:
+    - *id004
+    start_x: !!python/object/apply:torch._utils._rebuild_tensor_v2
+    - !!python/object/apply:torch.storage._load_from_bytes
+      - !!binary |
+        gAKKCmz8nEb5IGqoUBkugAJN6QMugAJ9cQAoWBAAAABwcm90b2NvbF92ZXJzaW9ucQFN6QNYDQAA
+        AGxpdHRsZV9lbmRpYW5xAohYCgAAAHR5cGVfc2l6ZXNxA31xBChYBQAAAHNob3J0cQVLAlgDAAAA
+        aW50cQZLBFgEAAAAbG9uZ3EHSwR1dS6AAihYBwAAAHN0b3JhZ2VxAGN0b3JjaApGbG9hdFN0b3Jh
+        Z2UKcQFYCAAAADk4NzQ2NTc2cQJYAwAAAGNwdXEDSwROdHEEUS6AAl1xAFgIAAAAOTg3NDY1NzZx
+        AWEuBAAAAAAAAAAAAAA/AAAAP83MzL3NzMy9
+    - 0
+    - !!python/tuple
+      - 1
+      - 4
+    - !!python/tuple
+      - 4
+      - 1
+    - false
+    - !!python/object/apply:collections.OrderedDict
+      - []
+    t_sim: 10.0
+learn_shape_epochs: 100
+primal_learning_rate: 0.001
+scale_parameter: 10.0
+scenarios:
+- *id004
+use_relu: true

@@ -1,4 +1,3 @@
-"""Define a dymamical system for an inverted pendulum"""
 from typing import Tuple, Optional, List
 from math import sqrt
 
@@ -8,18 +7,18 @@ from .control_affine_system import ControlAffineSystem
 from neural_clbf.systems.utils import Scenario, ScenarioList
 
 
-class LinearSatellite(ControlAffineSystem):
+class LinearPoint(ControlAffineSystem):
     """
-    Represents a satellite through the linearized Clohessy-Wiltshire equations
+    Represents a pointmass with 
 
     The system has state
 
-        x = [x, y, z, xdot, ydot, zdot]
+        x = [x, y, xdot, ydot]
 
     representing the position and velocity of the chaser satellite, and it
     has control inputs
 
-        u = [ux, uy, uz]
+        u = [ux, uy]
 
     representing the thrust applied in each axis. Distances are in km, and control
     inputs are measured in km/s^2.
@@ -34,23 +33,17 @@ class LinearSatellite(ControlAffineSystem):
     """
 
     # Number of states and controls
-    N_DIMS = 6
-    N_CONTROLS = 3
+    N_DIMS = 4
+    N_CONTROLS = 2
 
     # State indices
     X = 0
     Y = 1
-    Z = 2
-    XDOT = 3
-    YDOT = 4
-    ZDOT = 5
+    XDOT = 2
+    YDOT = 3
     # Control indices
     UX = 0
     UY = 1
-    UZ = 2
-
-    # Constant parameters
-    MU = 3.986e14  # Earth's gravitational parameter
 
     def __init__(
         self,
@@ -85,20 +78,12 @@ class LinearSatellite(ControlAffineSystem):
             True if parameters are valid, False otherwise
         """
         valid = True
-        # Make sure all needed parameters were provided
-        valid = valid and "a" in params
-        valid = valid and "ux_target" in params
-        valid = valid and "uy_target" in params
-        valid = valid and "uz_target" in params
-
-        # Make sure all parameters are physically valid
-        valid = valid and params["a"] > 0
 
         return valid
 
     @property
     def n_dims(self) -> int:
-        return LinearSatellite.N_DIMS
+        return LinearPoint.N_DIMS
 
     @property
     def angle_dims(self) -> List[int]:
@@ -106,7 +91,7 @@ class LinearSatellite(ControlAffineSystem):
 
     @property
     def n_controls(self) -> int:
-        return LinearSatellite.N_CONTROLS
+        return LinearPoint.N_CONTROLS
 
     @property
     def state_limits(self) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -116,12 +101,10 @@ class LinearSatellite(ControlAffineSystem):
         """
         # define upper and lower limits based around the nominal equilibrium input
         upper_limit = torch.ones(self.n_dims)
-        upper_limit[LinearSatellite.X] = 2.0
-        upper_limit[LinearSatellite.Y] = 2.0
-        upper_limit[LinearSatellite.Z] = 2.0
-        upper_limit[LinearSatellite.XDOT] = 1
-        upper_limit[LinearSatellite.YDOT] = 1
-        upper_limit[LinearSatellite.ZDOT] = 1
+        upper_limit[LinearPoint.X] = 2.0
+        upper_limit[LinearPoint.Y] = 2.0
+        upper_limit[LinearPoint.XDOT] = 1
+        upper_limit[LinearPoint.YDOT] = 1
 
         lower_limit = -1.0 * upper_limit
 
@@ -134,7 +117,7 @@ class LinearSatellite(ControlAffineSystem):
         limits for this system
         """
         # define upper and lower limits based around the nominal equilibrium input
-        upper_limit = torch.tensor([1.0, 1.0, 1.0])
+        upper_limit = torch.tensor([1.0, 1.0])
         lower_limit = -1.0 * upper_limit
 
         return (upper_limit, lower_limit)
@@ -149,7 +132,7 @@ class LinearSatellite(ControlAffineSystem):
 
         # Stay within some maximum distance from the target
         order = 1 if hasattr(self, "use_l1_norm") and self.use_l1_norm else 2
-        distance = x[:, : LinearSatellite.Z + 1].norm(dim=-1, p=order)
+        distance = x[:, : LinearPoint.Y + 1].norm(dim=-1, p=order)
         # safe_mask.logical_and_(distance <= 1.0)
 
         # Stay at least some minimum distance from the target
@@ -167,11 +150,11 @@ class LinearSatellite(ControlAffineSystem):
 
         # Maximum distance
         order = 1 if hasattr(self, "use_l1_norm") and self.use_l1_norm else 2
-        distance = x[:, : LinearSatellite.Z + 1].norm(dim=-1, p=order)
-        # unsafe_mask.logical_or_(distance >= 1.5)
+        distance = x[:, : LinearPoint.Y + 1].norm(dim=-1, p=order)
+        unsafe_mask.logical_or_(distance >= 1.5)
 
         # Minimum distance
-        unsafe_mask.logical_or_(distance <= 0.25)
+        # unsafe_mask.logical_or_(distance <= 0.25)
 
         return unsafe_mask
 
@@ -182,7 +165,7 @@ class LinearSatellite(ControlAffineSystem):
             x: a tensor of points in the state space
         """
         order = 1 if hasattr(self, "use_l1_norm") and self.use_l1_norm else 2
-        goal_mask = x[:, : LinearSatellite.Z + 1].norm(dim=-1, p=order) <= 0.5
+        goal_mask = x[:, : LinearPoint.Y + 1].norm(dim=-1, p=order) <= 0.5
 
         return goal_mask
 
@@ -202,96 +185,18 @@ class LinearSatellite(ControlAffineSystem):
         f = torch.zeros((batch_size, self.n_dims, 1))
         f = f.type_as(x)
 
-        # Extract the needed parameters
-        a = params["a"]
-        ux_target = params["ux_target"]
-        uy_target = params["uy_target"]
-        uz_target = params["uz_target"]
-        # Compute mean-motion
-        n = sqrt(LinearSatellite.MU / a ** 3)
-        # and state variables
-        x_ = x[:, LinearSatellite.X]
-        z_ = x[:, LinearSatellite.Z]
-        xdot_ = x[:, LinearSatellite.XDOT]
-        ydot_ = x[:, LinearSatellite.YDOT]
-        zdot_ = x[:, LinearSatellite.ZDOT]
+        xdot_ = x[:, LinearPoint.XDOT]
+        ydot_ = x[:, LinearPoint.YDOT]
 
         # The first three dimensions just integrate the velocity
-        f[:, LinearSatellite.X, 0] = xdot_
-        f[:, LinearSatellite.Y, 0] = ydot_
-        f[:, LinearSatellite.Z, 0] = zdot_
+        f[:, LinearPoint.X, 0] = xdot_
+        f[:, LinearPoint.Y, 0] = ydot_
 
         # The last three use the CHW equations
-        f[:, LinearSatellite.XDOT, 0] = 3 * n ** 2 * x_ + 2 * n * ydot_
-        f[:, LinearSatellite.YDOT, 0] = -2 * n * xdot_
-        f[:, LinearSatellite.ZDOT, 0] = -(n ** 2) * z_
-
-        # Add perturbations
-        f[:, LinearSatellite.XDOT, 0] += ux_target
-        f[:, LinearSatellite.YDOT, 0] += uy_target
-        f[:, LinearSatellite.ZDOT, 0] += uz_target
+        f[:, LinearPoint.XDOT, 0] = 0
+        f[:, LinearPoint.YDOT, 0] = 0
 
         return f
-
-    def _f_bounds(self, x_LB, x_UB, params):
-        """
-        Return bounds on the control-independent part of the control-affine dynamics.
-
-        args:
-            x_LB: bs x self.n_dims tensor of state lower bound
-            x_UB: bs x self.n_dims tensor of state upper bound
-            params: a dictionary giving the parameter values for the system. If None,
-                    default to the nominal parameters used at initialization
-        returns:
-            f_LB: bs x self.n_dims x 1 tensor
-            f_UB: bs x self.n_dims x 1 tensor
-        """
-        # Extract batch size and set up a tensor for holding the result
-        batch_size = x.shape[0]
-        f_LB = torch.zeros((batch_size, self.n_dims, 1))
-        f_UB = torch.zeros((batch_size, self.n_dims, 1))
-        f_LB = f_LB.type_as(x)
-        f_UB = f_UB.type_as(x)
-
-        # Extract the needed parameters
-        a = params["a"]
-        ux_target = params["ux_target"]
-        uy_target = params["uy_target"]
-        uz_target = params["uz_target"]
-        # Compute mean-motion
-        n = sqrt(LinearSatellite.MU / a ** 3)
-        # and state variables
-        x_LB = x_LB[:, LinearSatellite.X]
-        z_LB = x_LB[:, LinearSatellite.Z]
-        xdot_LB = x_LB[:, LinearSatellite.XDOT]
-        ydot_LB = x_LB[:, LinearSatellite.YDOT]
-        zdot_LB = x_LB[:, LinearSatellite.ZDOT]
-
-        x_UB = x_UB[:, LinearSatellite.X]
-        z_UB = x_UB[:, LinearSatellite.Z]
-        xdot_UB = x_UB[:, LinearSatellite.XDOT]
-        ydot_UB = x_UB[:, LinearSatellite.YDOT]
-        zdot_UB = x_UB[:, LinearSatellite.ZDOT]
-
-        # The first three dimensions just integrate the velocity
-        f_UB[:, LinearSatellite.X, 0] = xdot_UB
-        f_UB[:, LinearSatellite.Y, 0] = ydot_UB
-        f_UB[:, LinearSatellite.Z, 0] = zdot_UB
-
-        f_LB[:, LinearSatellite.X, 0] = xdot_LB
-        f_LB[:, LinearSatellite.Y, 0] = ydot_LB
-        f_LB[:, LinearSatellite.Z, 0] = zdot_LB
-
-        # The last three use the CHW equations
-        f_LB[:, LinearSatellite.XDOT, 0] = 3 * n ** 2 * x_LB + 2 * n * ydot_LB
-        f_LB[:, LinearSatellite.YDOT, 0] = -2 * n * xdot_UB
-        f_LB[:, LinearSatellite.ZDOT, 0] = -(n ** 2) * z_UB
-
-        f_UB[:, LinearSatellite.XDOT, 0] = 3 * n ** 2 * x_UB + 2 * n * ydot_UB
-        f_UB[:, LinearSatellite.YDOT, 0] = -2 * n * xdot_LB
-        f_UB[:, LinearSatellite.ZDOT, 0] = -(n ** 2) * z_LB
-
-        return f_LB.numpy(), f_UB.numpy()
 
     def _g(self, x: torch.Tensor, params: Scenario):
         """
@@ -310,8 +215,7 @@ class LinearSatellite(ControlAffineSystem):
         g = g.type_as(x)
 
         # The control inputs are accelerations
-        g[:, LinearSatellite.XDOT, LinearSatellite.UX] = 1.0
-        g[:, LinearSatellite.YDOT, LinearSatellite.UY] = 1.0
-        g[:, LinearSatellite.ZDOT, LinearSatellite.UZ] = 1.0
+        g[:, LinearPoint.XDOT, LinearPoint.UX] = 1.0
+        g[:, LinearPoint.YDOT, LinearPoint.UY] = 1.0
 
         return g
